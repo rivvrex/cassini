@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: rgba(20, 20, 20, 0.6);
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 0%, #111 0%, #050505 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: default;
+            user-select: none;
+        }
+
+        .bot-status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .running .status-dot { background-color: var(--success-color); }
+        .running .status-dot::after { background-color: var(--success-color); }
+        .stopped .status-dot { background-color: var(--danger-color); }
+        .stopped .status-dot::after { display: none; }
+        .paused .status-dot { background-color: var(--warning-color); }
+        .paused .status-dot::after { background-color: var(--warning-color); }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            70% { transform: scale(2.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-small {
+            padding: 1rem;
+        }
+
+        .card-small .stats-value {
+            font-size: 1.5rem;
+        }
+
+        .card-small .controls button {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-value {
+            font-size: 1.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-start {
+            background: var(--text-primary);
+            color: var(--bg-color);
+        }
+        .btn-start:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-pause {
+            background: transparent;
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        .btn-pause:hover { background: rgba(255, 255, 255, 0.05); }
+
+        .btn-stop {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .btn-stop:hover { background: rgba(239, 68, 68, 0.2); }
+
+        .event-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-time {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            width: 60px;
+        }
+
+        .event-info {
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        .event-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-impact {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+
+        .impact-high { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); }
+        .impact-medium { color: var(--warning-color); background: rgba(245, 158, 11, 0.1); }
+
+        .trade-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .trade-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .trade-item:last-child {
+            border-bottom: none;
+        }
+
+        .trade-time {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            width: 60px;
+        }
+
+        .trade-info {
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        .trade-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.15rem;
+        }
+
+        .trade-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .config-label { color: var(--text-secondary); }
+        .config-value { font-weight: 500; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        .rivrex-banner{display:flex;justify-content:center;align-items:center;margin:12px 0 0;font-size:1rem;font-weight:600;letter-spacing:-0.025em;background:linear-gradient(to right,#fff,#888);-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transition:opacity .25s ease}
+        .rivrex-banner.visible{opacity:1}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">CASSINI</div>
+            <div id="statusBadge" class="bot-status-badge stopped">
+                <span class="status-dot"></span>
+                <span id="statusText">System Offline</span>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- Execution Control -->
+            <div class="card card-small">
+                <div class="card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                    Execution Control
+                </div>
+                <div class="stats-label">Current MT5 Status</div>
+                <div class="stats-value" id="mt5Status">Disconnected</div>
+                <div class="controls">
+                    <button class="btn-start" onclick="control('start')">Start</button>
+                    <button class="btn-pause" onclick="control('pause')">Pause</button>
+                    <button class="btn-stop" onclick="control('stop')">Stop</button>
+                </div>
+            </div>
+
+            <!-- Configuration -->
+            <div class="card card-small">
+                <div class="card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    System Config
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Account</span>
+                    <span class="config-value">{{ config.MT5_LOGIN }}</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Server</span>
+                    <span class="config-value">{{ config.MT5_SERVER }}</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Threshold</span>
+                    <span class="config-value">{{ config.TRADE_THRESHOLD }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Events + Trades -->
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    Economic Calendar
+                </div>
+                <ul id="events" class="event-list">
+                    <!-- Events injected here -->
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v4H3z"></path><path d="M3 12h18v8H3z"></path></svg>
+                    Trades & PnL
+                </div>
+                <div class="stats-label">Net PnL</div>
+                <div class="stats-value" id="pnlValue">0.00</div>
+                <ul id="trades" class="trade-list">
+                    <!-- Trades injected here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Developer Easter Egg: Signature in Console
+        console.log(
+            "%c DESIGNED & BUILT BY RIVREX ",
+            "background: #111; color: #3b82f6; font-size: 14px; font-weight: bold; border: 1px solid #3b82f6; padding: 4px; border-radius: 4px;"
+        );
+
+        function control(action) {
+            fetch('/api/control', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action })
+            }).then(r => r.json()).then(refresh);
+        }
+
+        function refresh() {
+            fetch('/api/status').then(r => r.json()).then(function (d) {
+                var badge = document.getElementById('statusBadge');
+                var text = document.getElementById('statusText');
+                var mt5 = document.getElementById('mt5Status');
+                var pnlValue = document.getElementById('pnlValue');
+                var tradesList = document.getElementById('trades');
+                
+                var status = d.running ? (d.paused ? 'paused' : 'running') : 'stopped';
+                badge.className = 'bot-status-badge ' + status;
+                text.textContent = d.running ? (d.paused ? 'System Paused' : 'System Active') : 'System Offline';
+                
+                mt5.textContent = d.mt5_connected ? 'Connected' : 'Disconnected';
+                mt5.style.color = d.mt5_connected ? 'var(--success-color)' : 'var(--danger-color)';
+
+                if (pnlValue && d.account_data && typeof d.account_data.profit === 'number') {
+                    pnlValue.textContent = d.account_data.profit.toFixed(2);
+                } else if (pnlValue) {
+                    pnlValue.textContent = 'N/A';
+                }
+
+                if (tradesList) {
+                    var trades = d.trade_history || [];
+                    if (trades.length === 0) {
+                        tradesList.innerHTML = '<li class="trade-item"><div class="trade-name" style="color: var(--text-secondary)">No trades yet</div></li>';
+                    } else {
+                        tradesList.innerHTML = trades.map(function (t) {
+                            var timeStr = t.time || '';
+                            if (timeStr && timeStr.indexOf('T') > -1) {
+                                try {
+                                    var dt = new Date(timeStr);
+                                    timeStr = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                                } catch (err) {}
+                            }
+                            var symbol = t.symbol || '';
+                            var statusText = t.status || '';
+                            var line = [t.signal || '', symbol, statusText].filter(Boolean).join(' · ');
+                            return (
+                                '<li class="trade-item">' +
+                                '<div class="trade-time">' + (timeStr || '--:--') + '</div>' +
+                                '<div class="trade-info">' +
+                                '<div class="trade-name">' + (t.event || 'Trade') + '</div>' +
+                                '<div class="trade-meta">' + line + '</div>' +
+                                '</div>' +
+                                '</li>'
+                            );
+                        }).join('');
+                    }
+                }
+            });
+
+            fetch('/api/events').then(r => r.json()).then(function (d) {
+                var ul = document.getElementById('events');
+                var events = d.events || [];
+                
+                if (events.length === 0) {
+                    ul.innerHTML = '<li class="event-item"><div class="event-name" style="color: var(--text-secondary)">No events scheduled for today</div></li>';
+                    return;
+                }
+
+                ul.innerHTML = events.slice(0, 20).map(function (e) {
+                    var timeStr = e.time || '';
+                    if (timeStr && timeStr.indexOf('T') > -1) {
+                        try {
+                            var date = new Date(timeStr);
+                            timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                        } catch (err) {}
+                    }
+                    
+                    var impactClass = '';
+                    var impact = (e.impact || '').toLowerCase();
+                    if (impact.includes('high')) impactClass = 'impact-high';
+                    else if (impact.includes('medium')) impactClass = 'impact-medium';
+
+                    return `
+                        <li class="event-item">
+                            <div class="event-time">${timeStr}</div>
+                            <div class="event-info">
+                                <div class="event-name">${e.headline || e.name}</div>
+                                <span class="event-impact ${impactClass}">${e.impact || 'Low'}</span>
+                            </div>
+                        </li>
+                    `;
+                }).join('');
+            });
+        }
+
+        setInterval(refresh, 5000);
+        refresh();
+        function showRivrex(){if(document.getElementById('rivrexBanner'))return;var t=document.createElement('div');t.id='rivrexBanner';t.className='rivrex-banner';t.textContent='Created by RIVREX';var grids=document.querySelectorAll('.grid');var anchor=grids[1]||grids[0]||document.querySelector('.container');if(anchor&&anchor.insertAdjacentElement){anchor.insertAdjacentElement('afterend',t)}else{document.body.appendChild(t)}setTimeout(function(){t.classList.add('visible')},10);setTimeout(function(){t.classList.remove('visible');setTimeout(function(){try{t.remove()}catch(e){}},300)},4500)}
+        (function(){var check=function(){if((location.hash||'').toLowerCase().indexOf('rivrex')>-1){showRivrex()}};check();window.addEventListener('hashchange',check);var logo=document.querySelector('.logo');if(!logo)return;var timer;var start=function(){clearTimeout(timer);timer=setTimeout(showRivrex,10000)};var cancel=function(){clearTimeout(timer)};logo.addEventListener('mouseenter',start);logo.addEventListener('mouseleave',cancel)})()
+    </script>
+</body>
+</html>
