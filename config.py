@@ -1,8 +1,8 @@
 # --- MT5 Credentials ---
 # IMPORTANT: Replace with your actual broker MT5 account details
-MT5_LOGIN = 11820835
-MT5_PASSWORD = "bY4Dkw#Y"
-MT5_SERVER = "VantageInternational-Demo"
+MT5_LOGIN = 1234567
+MT5_PASSWORD = "demo"
+MT5_SERVER = "Demo"
 
 # --- Trading Parameters ---
 DEFAULT_SYMBOL = "USDJPY"
